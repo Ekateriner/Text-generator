@@ -5,8 +5,9 @@ from sys import stdin as stdin
 import pickle
 
 
-def check(word=" "):
-    word = word.lower()
+def check(word=" ", lc=False):
+    if lc:
+        word = word.lower()
 
     if re.fullmatch('[a-zа-я]*', word) or re.fullmatch("[0-9]*", word):
         return word, False, True
@@ -265,21 +266,26 @@ def check(word=" "):
 
 words = {'.': {}}
 
-#argparse
+parser = argparse.ArgumentParser(description='This program study. It gets text. '
+                                             'Then it creates model - "small dictionary"')
+parser.add_argument("--input-dir", action='store',
+                    help="specify the path to the directory, where you have training files; default - stdin")
+parser.add_argument("--model", action='store', nargs='?', default="model.txt",
+                    help="specify the path to the file, where you want to save model")
+parser.add_argument("--lc", action='store', type=bool, nargs='?', default=False,
+                    help="leads words stored in the model to lower case")
 
-directory = "" #something argparse
-something = False #kind of input
+arg = parser.parse_args()
 
-if something:
-    files = [x for x in listdir(path="{}".format(directory)) if x.endswith(".txt")]
+if not (arg.input_dir is None):
+    files = [x for x in listdir(path="{}".format(arg.input_dir)) if x.endswith(".txt")]
 else:
     files = [""]
 
+file = stdin
 for f in files:
-    if something:
+    if not (arg.input_dir is None):
         file = open("{}".format(f), 'r')
-    else:
-        file = stdin
 
     isEnd = False
     lastWord = "."
@@ -287,13 +293,13 @@ for f in files:
         try:
             allWords = input().split()
 
-            if not something and allWords == ["0"]:
+            if (arg.input_dir is None) and allWords == ["0"]:
                 break
 
             for i in range(len(allWords)):
                 w = allWords[i]
 
-                w, isEnd, result = check(w)
+                w, isEnd, result = check(w, arg.lc)
                 if result:
                     if not(w in words.keys()):
                         words[w] = {}
@@ -328,5 +334,5 @@ for f in files:
             words[lastWord]['.'] = 1
         lastWord = '.'
 
-outFile = open("model.txt", 'wb')
+outFile = open("{}".format(arg.model), 'wb')
 pickle.dump(words, outFile)
