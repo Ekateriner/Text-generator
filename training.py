@@ -5,8 +5,15 @@ from sys import stdin as stdin
 import pickle
 
 
-def check(word=" "):
-    word = word.lower()
+def check(word=" ", lc=False):
+    if lc:
+        word = word.lower()
+
+    if word == "" or word == " ":
+        return '', False, False
+    
+    if word == ".":
+        return word, True, True
 
     if re.fullmatch('[a-zа-я]*', word) or re.fullmatch("[0-9]*", word):
         return word, False, True
@@ -265,35 +272,37 @@ def check(word=" "):
 
 words = {'.': {}}
 
-#argparse
+parser = argparse.ArgumentParser(description='This program study. It gets text. '
+                                             'Then it creates model - "small dictionary"')
+parser.add_argument("--input-dir", action='store',
+                    help="specify the path to the directory, where you have training files; default - stdin")
+parser.add_argument("--model", action='store', nargs='?', default="model.txt",
+                    help="specify the path to the file, where you want to save model")
+parser.add_argument("--lc", action='store', type=bool, nargs='?', default=False,
+                    help="leads words stored in the model to lower case")
 
-directory = "" #something argparse
-something = False #kind of input
+arg = parser.parse_args()
 
-if something:
-    files = [x for x in listdir(path="{}".format(directory)) if x.endswith(".txt")]
+if not (arg.input_dir is None):
+    files = [x for x in listdir(path="{}".format(arg.input_dir)) if x.endswith(".txt")]
 else:
     files = [""]
 
+file = stdin
 for f in files:
-    if something:
-        file = open("{}".format(f), 'r')
-    else:
-        file = stdin
+    if not (arg.input_dir is None):
+        file = open("{}/{}".format(arg.input_dir, f), 'r')
 
     isEnd = False
     lastWord = "."
-    while True:
-        try:
-            allWords = input().split()
+    for line in file:
+        allWords = line[:-1].split()
 
-            if not something and allWords == ["0"]:
-                break
+        for i in range(len(allWords)):
+            w = allWords[i]
 
-            for i in range(len(allWords)):
-                w = allWords[i]
-
-                w, isEnd, result = check(w)
+            w, isEnd, result = check(w, arg.lc)
+            if not w == '':
                 if result:
                     if not(w in words.keys()):
                         words[w] = {}
@@ -318,15 +327,15 @@ for f in files:
                         words[lastWord]['.'] = 1
                     lastWord = '.'
 
-        except EOFError:
-            break
-
-    if lastWord != '.':
+    if not lastWord == '.' and not lastWord == '':
         if '.' in words[lastWord].keys():
             words[lastWord]['.'] += 1
         else:
             words[lastWord]['.'] = 1
         lastWord = '.'
 
-outFile = open("model.txt", 'wb')
+outFile = open("{}".format(arg.model), 'wb')
 pickle.dump(words, outFile)
+file.close()
+outFile.close()
+
