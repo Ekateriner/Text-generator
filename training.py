@@ -10,10 +10,10 @@ def check(word=" "):
         return '', False
 
     elif re.fullmatch("\W*\w+[-']\w+\W*", word):
-        return re.findall(r"\w+[-']\w+]", word), True
+        return re.findall(r"\w+[-']\w+", word)[0], True
 
     elif re.fullmatch("\W*\w+\W*", word):
-        return re.findall(r"\w+", word), True
+        return re.findall("\w+", word)[0], True
 
     return word, False
 
@@ -44,7 +44,7 @@ for f in files:
     isEnd = False
     lastWord = "."
     for line in file:
-        allWords = re.findall(r"[\w'-]+|[.?!]", line[:-1])
+        allWords = re.findall(r"[\w'-]+|[.?!]|\n", line[:-1])
 
         for i in range(len(allWords)):
             w = allWords[i]
@@ -61,6 +61,8 @@ for f in files:
                         words[lastWord][w] += 1
                     else:
                         words[lastWord][w] = 1
+
+                    lastWord = w
 
                 elif not lastWord == '.':
                     if '.' in words[lastWord].keys():
