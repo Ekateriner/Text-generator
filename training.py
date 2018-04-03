@@ -5,269 +5,17 @@ from sys import stdin as stdin
 import pickle
 
 
-def check(word=" ", lc=False):
-    if lc:
-        word = word.lower()
+def check(word=" "):
+    if re.fullmatch('\W*', word) and not re.fullmatch('[.?!]+', word):
+        return '', False
 
-    if word == "" or word == " ":
-        return '', False, False
-    
-    if word == ".":
-        return word, True, True
+    elif re.fullmatch("\W*\w+[-']\w+\W*", word):
+        return re.findall(r"\w+[-']\w+]", word), True
 
-    if re.fullmatch('[a-zа-я]*', word) or re.fullmatch("[0-9]*", word):
-        return word, False, True
+    elif re.fullmatch("\W*\w+\W*", word):
+        return re.findall(r"\w+", word), True
 
-    elif (re.fullmatch('[a-zа-я]*', word[:-1])
-            or re.fullmatch("[0-9]*", word[:-1])) and word[-1] == '.':
-        return word[:-1], True, True
-
-    elif (re.fullmatch('[a-zа-я]*', word[:-1])
-            or re.fullmatch("[0-9]*", word[:-1])) and word[-1] == '!':
-        return word[:-1], True, True
-
-    elif (re.fullmatch('[a-zа-я]*', word[:-1])
-            or re.fullmatch("[0-9]*", word[:-1])) and word[-1] == '?':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-z]*'", word):
-        return word, False, True
-
-    elif re.fullmatch("[0-9]*1st", word) or re.fullmatch("[0-9]*2nd", word) \
-            or re.fullmatch("[0-9]*3rd", word) or re.fullmatch("[0-9]*th", word):
-        return word, False, True
-
-    elif re.fullmatch('[a-zа-я]*\W?', word) or re.fullmatch("[0-9]*\W?", word):
-        return word[:-1], False, True
-
-    elif (re.fullmatch('[a-zа-я]*\W?', word[:-1])
-            or re.fullmatch("[0-9]*\W?", word[:-1])) and word[-1] == '.':
-        return word[:-2], True, True
-
-    elif (re.fullmatch('[a-zа-я]*\W?', word[:-1])
-            or re.fullmatch("[0-9]*\W?", word[:-1])) and word[-1] == '!':
-        return word[:-2], True, True
-
-    elif (re.fullmatch('[a-zа-я]*\W?', word[:-1])
-            or re.fullmatch("[0-9]*\W?", word[:-1])) and word[-1] == '?':
-        return word[:-2], True, True
-
-    elif re.fullmatch('[a-zа-я]*\W?\W?', word) or re.fullmatch("[0-9]*\W?\W?", word):
-        return word[:-2], False, True
-
-    elif (re.fullmatch('[a-zа-я]*\W?\W?', word[:-1])
-            or re.fullmatch("[0-9]*\W?\W?", word[:-1])) and word[-1] == '.':
-        return word[:-3], True, True
-
-    elif (re.fullmatch('[a-zа-я]*\W?\W?', word[:-1])
-            or re.fullmatch("[0-9]*\W?\W?", word[:-1])) and word[-1] == '!':
-        return word[:-3], True, True
-
-    elif (re.fullmatch('[a-zа-я]*\W?\W?', word[:-1])
-            or re.fullmatch("[0-9]*\W?\W?", word[:-1])) and word[-1] == '?':
-        return word[:-3], True, True
-
-    ######################################################
-
-    elif re.fullmatch("[a-z]*'[a-z]", word):
-        return word, False, True
-
-    elif re.fullmatch("[a-z]*'[a-z]", word[-1]) and word[-1] == '.':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-z]*'[a-z]", word[-1]) and word[-1] == '!':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-z]*'[a-z]", word[-1]) and word[-1] == '?':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[a-zа-я]*", word):
-        return word, False, True
-
-    elif re.fullmatch("[a-zа-я]*-[a-zа-я]*", word[-1]) and word[-1] == '.':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[a-zа-я]*", word[-1]) and word[-1] == '!':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[a-zа-я]*", word[-1]) and word[-1] == '?':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-z]*'[a-z]\W?", word):
-        return word[:-1], False, True
-
-    elif re.fullmatch("[a-z]*'[a-z]\W?", word[-1]) and word[-1] == '.':
-        return word[:-2], True, True
-
-    elif re.fullmatch("[a-z]*-[a-z]*\W?", word):
-        return word[:-1], False, True
-
-    elif re.fullmatch("[a-zа-я]*-[a-zа-я]*\W?", word[-1]) and word[-1] == '.':
-        return word[:-2], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[a-zа-я]*\W?", word[-1]) and word[-1] == '!':
-        return word[:-2], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[a-zа-я]*\W?", word[-1]) and word[-1] == '?':
-        return word[:-2], True, True
-
-    ######################################################
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*", word):
-        return word, False, True
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*", word[-1]) and word[-1] == '.':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*", word[-1]) and word[-1] == '!':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*", word[-1]) and word[-1] == '?':
-        return word[:-1], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*\W?", word):
-        return word[:-1], False, True
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*\W?", word[-1]) and word[-1] == '.':
-        return word[:-2], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*\W?", word[-1]) and word[-1] == '!':
-        return word[:-2], True, True
-
-    elif re.fullmatch("[a-zа-я]*-[0-9]*\W?", word[-1]) and word[-1] == '?':
-        return word[:-2], True, True
-
-    #######################################################
-
-    elif re.fullmatch('\W?[a-zа-я]*', word) or re.fullmatch("\W?[0-9]*", word):
-        return word[1:], False, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*', word[:-1])
-            or re.fullmatch("\W?[0-9]*", word[:-1])) and word[-1] == '.':
-        return word[1:-1], True, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*', word[:-1])
-            or re.fullmatch("\W?[0-9]*", word[:-1])) and word[-1] == '!':
-        return word[1:-1], True, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*', word[:-1])
-            or re.fullmatch("\W?[0-9]*", word[:-1])) and word[-1] == '?':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-z]*'", word):
-        return word[1:], False, True
-
-    elif re.fullmatch("\W?[0-9]*1st", word) or re.fullmatch("\W?[0-9]*2nd", word) \
-            or re.fullmatch("\W?[0-9]*3rd", word) or re.fullmatch("\W?[0-9]*th", word):
-        return word[1:], False, True
-
-    elif re.fullmatch('\W?[a-zа-я]*\W?', word) or re.fullmatch("\W?[0-9]*\W?", word):
-        return word[1:-1], False, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*\W?', word[:-1])
-            or re.fullmatch("\W?[0-9]*\W?", word[:-1])) and word[-1] == '.':
-        return word[1:-2], True, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*\W?', word[:-1])
-            or re.fullmatch("\W?[0-9]*\W?", word[:-1])) and word[-1] == '!':
-        return word[1:-2], True, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*\W?', word[:-1])
-            or re.fullmatch("\W?[0-9]*\W?", word[:-1])) and word[-1] == '?':
-        return word[1:-2], True, True
-
-    elif re.fullmatch('\W?[a-zа-я]*\W?\W?', word) or re.fullmatch("\W?[0-9]*\W?\W?", word):
-        return word[1:-2], False, True
-
-    elif re.fullmatch('\W?[a-zа-я]*\W?\W?', word[:-1])\
-            or re.fullmatch("\W?[0-9]*\W?\W?", word[:-1]) and word[-1] == '.':
-        return word[1:-3], True, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*\W?\W?', word[:-1])
-            or re.fullmatch("\W?[0-9]*\W?\W?", word[:-1])) and word[-1] == '!':
-        return word[1:-3], True, True
-
-    elif (re.fullmatch('\W?[a-zа-я]*\W?\W?', word[:-1])
-            or re.fullmatch("\W?[0-9]*\W?\W?", word[:-1])) and word[-1] == '?':
-        return word[1:-3], True, True
-
-    ########################################################
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]", word):
-        return word[1:], False, True
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]", word[-1]) and word[-1] == '.':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]", word[-1]) and word[-1] == '!':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]", word[-1]) and word[-1] == '?':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[a-zа-я]*", word):
-        return word[1:], False, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[a-zа-я]*", word[-1]) and word[-1] == '.':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[a-zа-я]*", word[-1]) and word[-1] == '!':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[a-zа-я]*", word[-1]) and word[-1] == '?':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]\W?", word):
-        return word[1:-1], False, True
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]\W?", word[-1]) and word[-1] == '.':
-        return word[1:-2], True, True
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]\W?", word[-1]) and word[-1] == '!':
-        return word[1:-2], True, True
-
-    elif re.fullmatch("\W?[a-z]*'[a-z]\W?", word[-1]) and word[-1] == '?':
-        return word[1:-2], True, True
-
-    elif re.fullmatch("\W?[a-z]*-[a-z]*\W?", word):
-        return word[1:-1], False, True
-
-    elif re.fullmatch("\W?[a-z]*-[a-z]*\W?", word[-1]) and word[-1] == '.':
-        return word[1:-2], True, True
-
-    elif re.fullmatch("\W?[a-z]*-[a-z]*\W?", word[-1]) and word[-1] == '?':
-        return word[1:-2], True, True
-
-    elif re.fullmatch("\W?[a-z]*-[a-z]*\W?", word[-1]) and word[-1] == '!':
-        return word[1:-2], True, True
-
-    ######################################################
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*", word):
-        return word[1:], False, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*", word[-1]) and word[-1] == '.':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*", word[-1]) and word[-1] == '!':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*", word[-1]) and word[-1] == '?':
-        return word[1:-1], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*\W?", word):
-        return word[1:-1], False, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*\W?", word[-1]) and word[-1] == '.':
-        return word[1:-2], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*\W?", word[-1]) and word[-1] == '!':
-        return word[1:-2], True, True
-
-    elif re.fullmatch("\W?[a-zа-я]*-[0-9]*\W?", word[-1]) and word[-1] == '?':
-        return word[1:-2], True, True
-
-    return '', False, False
+    return word, False
 
 
 words = {'.': {}}
@@ -296,12 +44,14 @@ for f in files:
     isEnd = False
     lastWord = "."
     for line in file:
-        allWords = line[:-1].split()
+        allWords = re.findall(r"[\w'-]+|[.?!]", line[:-1])
 
         for i in range(len(allWords)):
             w = allWords[i]
+            if arg.lc:
+                w = w.lower()
 
-            w, isEnd, result = check(w, arg.lc)
+            w, result = check(w)
             if not w == '':
                 if result:
                     if not(w in words.keys()):
@@ -312,14 +62,6 @@ for f in files:
                     else:
                         words[lastWord][w] = 1
 
-                    if isEnd:
-                        if '.' in words[w].keys():
-                            words[w]['.'] += 1
-                        else:
-                            words[w]['.'] = 1
-                        lastWord = '.'
-                    else:
-                        lastWord = w
                 elif not lastWord == '.':
                     if '.' in words[lastWord].keys():
                         words[lastWord]['.'] += 1
@@ -334,8 +76,7 @@ for f in files:
             words[lastWord]['.'] = 1
         lastWord = '.'
 
-outFile = open("{}".format(arg.model), 'wb')
-pickle.dump(words, outFile)
 file.close()
-outFile.close()
 
+with open("{}".format(arg.model), 'wb') as outFile:
+    pickle.dump(words, outFile)

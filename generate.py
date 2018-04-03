@@ -15,8 +15,8 @@ parser.add_argument("--length", action='store', type=int, required=True,
 
 arg = parser.parse_args()
 
-file = open('{}'.format(arg.model), 'rb')
-words = pickle.load(file)
+with open('{}'.format(arg.model), 'rb') as file:
+    words = pickle.load(file)
 
 file = stdout
 if not (arg.output is None):
@@ -46,3 +46,4 @@ for i in range(n):
             currentWord = word
         file.write(" {}".format(word))
 
+file.close()
