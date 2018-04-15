@@ -18,6 +18,19 @@ def check(word=" "):
     return word, False
 
 
+def newOpen(fl = '', directory = None):
+    if directory is None:
+        file = stdin
+    else:
+        file = open("{dir}/{f}".format(dir = directory, f = fl), 'r')
+    
+    try:
+        yield file
+    finally:
+        if file is not stdin:
+            file.close()
+
+
 words = {'.': {}}
 
 parser = argparse.ArgumentParser(description='This program study. It gets text. '
@@ -36,49 +49,44 @@ if not (arg.input_dir is None):
 else:
     files = [""]
 
-file = stdin
 for f in files:
-    if not (arg.input_dir is None):
-        file = open("{}/{}".format(arg.input_dir, f), 'r')
+    with newOpen(f, arg.input_dir) as file:
+        isEnd = False
+        lastWord = "."
+        for line in file:
+            allWords = re.findall(r"[\w'-]+|[.?!]|\n", line[:-1])
 
-    isEnd = False
-    lastWord = "."
-    for line in file:
-        allWords = re.findall(r"[\w'-]+|[.?!]|\n", line[:-1])
+            for i in range(len(allWords)):
+                w = allWords[i]
+                if arg.lc:
+                    w = w.lower()
 
-        for i in range(len(allWords)):
-            w = allWords[i]
-            if arg.lc:
-                w = w.lower()
+                w, result = check(w)
+                if not w == '':
+                    if result:
+                        if not(w in words.keys()):
+                            words[w] = {}
 
-            w, result = check(w)
-            if not w == '':
-                if result:
-                    if not(w in words.keys()):
-                        words[w] = {}
+                        if w in words[lastWord].keys():
+                            words[lastWord][w] += 1
+                        else:
+                            words[lastWord][w] = 1
 
-                    if w in words[lastWord].keys():
-                        words[lastWord][w] += 1
-                    else:
-                        words[lastWord][w] = 1
+                        lastWord = w
 
-                    lastWord = w
+                    elif not lastWord == '.':
+                        if '.' in words[lastWord].keys():
+                            words[lastWord]['.'] += 1
+                        else:
+                            words[lastWord]['.'] = 1
+                        lastWord = '.'
 
-                elif not lastWord == '.':
-                    if '.' in words[lastWord].keys():
-                        words[lastWord]['.'] += 1
-                    else:
-                        words[lastWord]['.'] = 1
-                    lastWord = '.'
-
-    if not lastWord == '.' and not lastWord == '':
-        if '.' in words[lastWord].keys():
-            words[lastWord]['.'] += 1
-        else:
-            words[lastWord]['.'] = 1
-        lastWord = '.'
-
-file.close()
+        if not lastWord == '.' and not lastWord == '':
+            if '.' in words[lastWord].keys():
+                words[lastWord]['.'] += 1
+            else:
+                words[lastWord]['.'] = 1
+            lastWord = '.'
 
 with open("{}".format(arg.model), 'wb') as outFile:
     pickle.dump(words, outFile)

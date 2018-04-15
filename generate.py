@@ -3,6 +3,19 @@ from random import choice as choice
 from sys import stdout as stdout
 import argparse
 
+def newOpen(f = None):
+    if f is None:
+        file = stdout
+    else:
+        file = open("{fl}".format(fl = f), 'w')
+    
+    try:
+        yield file
+    finally:
+        if file is not stdin:
+            file.close()
+
+
 parser = argparse.ArgumentParser(description='This program generate new text based on given model')
 parser.add_argument("--model", action='store', nargs='?', default="model.txt",
                     help="specify the path to the directory, where you have model")
@@ -18,32 +31,29 @@ arg = parser.parse_args()
 with open('{}'.format(arg.model), 'rb') as file:
     words = pickle.load(file)
 
-file = stdout
-if not (arg.output is None):
-    file = open("{}".format(arg.output), 'w')
-
-n = arg.length
-currentWord = arg.seed
-for i in range(n):
-    nextWords = []
-    for w in words[currentWord]:
-        for j in range(words[currentWord][w]):
-            nextWords.append(w)
-    word = choice(nextWords)
-    if word == '.':
-        file.write(".")
-        currentWord = '.'
-    elif len(words[word]) == 0:
-        if currentWord == '.':
-            word = word[0].upper() + word[1:]
-        file.write(" {}.".format(word))
-        currentWord = '.'
-    else:
-        if currentWord == '.':
-            currentWord = word
-            word = word[0].upper() + word[1:]
+with newOpen(arg.output) as file:
+    n = arg.length
+    currentWord = arg.seed
+    for i in range(n):
+        nextWords = []
+        for w in words[currentWord]:
+            for j in range(words[currentWord][w]):
+                nextWords.append(w)
+        word = choice(nextWords)
+        if word == '.':
+            file.write(".")
+            currentWord = '.'
+        elif len(words[word]) == 0:
+            if currentWord == '.':
+                word = word[0].upper() + word[1:]
+            file.write(" {}".format(word))
+            file.write(".")
+            currentWord = '.'
         else:
-            currentWord = word
-        file.write(" {}".format(word))
+            if currentWord == '.':
+                currentWord = word
+                word = word[0].upper() + word[1:]
+            else:
+                currentWord = word
+            file.write(" {}".format(word))
 
-file.close()
