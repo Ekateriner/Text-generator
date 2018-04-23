@@ -6,8 +6,19 @@ import pickle
 
 
 def check(word=" "):
+    
+    #
+    # первое возвращается слово или то что считалось словом или '', в зависимости от этого
+    # мы либо будем обрабатывать его, либо считать что цепочка слов закончилась, либо игнорим
+    # так как по возвращаемому значению не понятно слово ли это, возвращаем также bool
+    #
+
     if re.fullmatch('\W*', word) and not re.fullmatch('[.?!]+', word):
         return '', False
+
+    #
+    # так как re.fullmatch ниже возвращает list (хотя он и состоит из одного слова) пишу [0]
+    #
 
     elif re.fullmatch("\W*\w+[-']\w+\W*", word):
         return re.findall(r"\w+[-']\w+", word)[0], True
@@ -18,11 +29,11 @@ def check(word=" "):
     return word, False
 
 
-def newOpen(fl = '', directory = None):
+def new_open(arg_file='', directory=None):
     if directory is None:
         file = stdin
     else:
-        file = open("{dir}/{f}".format(dir = directory, f = fl), 'r')
+        file = open("{dir}/{file_name}".format(dir=directory, file_name=arg_file), 'r')
     
     try:
         yield file
@@ -50,7 +61,7 @@ else:
     files = [""]
 
 for f in files:
-    with newOpen(f, arg.input_dir) as file:
+    with new_open(f, arg.input_dir) as file:
         isEnd = False
         lastWord = "."
         for line in file:
@@ -74,7 +85,7 @@ for f in files:
 
                         lastWord = w
 
-                    elif not lastWord == '.':
+                    elif lastWord != '.':
                         if '.' in words[lastWord].keys():
                             words[lastWord]['.'] += 1
                         else:

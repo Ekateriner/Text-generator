@@ -3,11 +3,11 @@ from random import choice as choice
 from sys import stdout as stdout
 import argparse
 
-def newOpen(f = None):
-    if f is None:
+def new_open(arg_file=None):
+    if arg_file is None:
         file = stdout
     else:
-        file = open("{fl}".format(fl = f), 'w')
+        file = open("{file_name}".format(file_name=arg_file), 'w')
     
     try:
         yield file
@@ -31,7 +31,7 @@ arg = parser.parse_args()
 with open('{}'.format(arg.model), 'rb') as file:
     words = pickle.load(file)
 
-with newOpen(arg.output) as file:
+with new_open(arg.output) as file:
     n = arg.length
     currentWord = arg.seed
     for i in range(n):
