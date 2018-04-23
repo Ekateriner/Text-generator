@@ -3,7 +3,7 @@ import argparse
 from os import listdir as listdir
 from sys import stdin as stdin
 import pickle
-
+import contextlib
 
 def check(word=" "):
     
@@ -13,22 +13,23 @@ def check(word=" "):
     # так как по возвращаемому значению не понятно слово ли это, возвращаем также bool
     #
 
-    if re.fullmatch('\W*', word) and not re.fullmatch('[.?!]+', word):
+    if re.fullmatch('\W*', word) and not re.fullmatch('[\.\?\!]+', word):
         return '', False
 
     #
     # так как re.fullmatch ниже возвращает list (хотя он и состоит из одного слова) пишу [0]
     #
 
-    elif re.fullmatch("\W*\w+[-']\w+\W*", word):
-        return re.findall(r"\w+[-']\w+", word)[0], True
+    elif re.fullmatch(r"\W*\w+[-']\w+\W*", word):
+        return re.findall(r"\W*(\w+[-']\w+)\W*", word)[0], True
 
-    elif re.fullmatch("\W*\w+\W*", word):
-        return re.findall("\w+", word)[0], True
+    elif re.fullmatch(r"\W*\w+\W*", word):
+        return re.findall("\W*(\w+)\W*", word)[0], True
 
     return word, False
 
 
+@contextlib.contextmanager
 def new_open(arg_file='', directory=None):
     if directory is None:
         file = stdin

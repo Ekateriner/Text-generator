@@ -2,7 +2,9 @@ import pickle
 from random import choice as choice
 from sys import stdout as stdout
 import argparse
+import contextlib
 
+@contextlib.contextmanager
 def new_open(arg_file=None):
     if arg_file is None:
         file = stdout
@@ -12,7 +14,7 @@ def new_open(arg_file=None):
     try:
         yield file
     finally:
-        if file is not stdin:
+        if file is not stdout:
             file.close()
 
 
